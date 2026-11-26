@@ -4,10 +4,10 @@ import { cidadeAlvo, numero, porteEstimado, telefone } from "./normalizar";
 import { pontuar } from "./pontuacao";
 
 test("telefone: celular, fixo, com 55 e lixo", () => {
-  assert.deepEqual(telefone("(81) 99258-6464"), { numero: "5581992586464", tipo: "CELULAR" });
-  assert.deepEqual(telefone("(81) 3052-2850"), { numero: "558130522850", tipo: "FIXO" });
-  assert.deepEqual(telefone("+55 81 99258-6464"), { numero: "5581992586464", tipo: "CELULAR" });
-  assert.deepEqual(telefone("081 3542-7981"), { numero: "558135427981", tipo: "FIXO" });
+  assert.deepEqual(telefone("(81) 99999-0000"), { numero: "5581999990000", tipo: "CELULAR" });
+  assert.deepEqual(telefone("(81) 3333-4444"), { numero: "558133334444", tipo: "FIXO" });
+  assert.deepEqual(telefone("+55 81 99999-0000"), { numero: "5581999990000", tipo: "CELULAR" });
+  assert.deepEqual(telefone("081 3555-6666"), { numero: "558135556666", tipo: "FIXO" });
   assert.equal(telefone("123"), null);
   assert.equal(telefone(null), null);
 });
@@ -46,5 +46,5 @@ test("pontuação: hospital, farmácia e fechada são descartados", () => {
   assert.equal(pontuar({ nome: "Clínica Boa", tipo: "MEDICINA", nota: 4, avaliacoes: 50, tipoTelefone: null, temWhatsapp: null, fechadaNoGoogle: true }).descartar, true);
   // "Ótica" descarta, mas "Oftalmologia" não
   assert.equal(pontuar({ nome: "Ótica Visão", tipo: "OFTALMOLOGIA", nota: 4, avaliacoes: 50, tipoTelefone: null, temWhatsapp: null }).descartar, true);
-  assert.equal(pontuar({ nome: "Clínica de Oftalmologia OftalmoAbreu", tipo: "OFTALMOLOGIA", nota: 4.5, avaliacoes: 30, tipoTelefone: "FIXO", temWhatsapp: null }).descartar, false);
+  assert.equal(pontuar({ nome: "Clínica de Oftalmologia Exemplo", tipo: "OFTALMOLOGIA", nota: 4.5, avaliacoes: 30, tipoTelefone: "FIXO", temWhatsapp: null }).descartar, false);
 });

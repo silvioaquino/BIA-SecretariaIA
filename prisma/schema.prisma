@@ -157,7 +157,7 @@ model Pagamento {
   @@index([clinicaId])
 }
 
-// ───────────── Prospecção (uso interno: Silvio e Meiry) ─────────────
+// ───────────── Prospecção (uso interno da equipe) ─────────────
 
 enum TipoTelefone {
   CELULAR

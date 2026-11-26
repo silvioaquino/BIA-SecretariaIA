@@ -31,7 +31,7 @@ export async function exigirUsuario() {
   return usuario;
 }
 
-/** E-mails da equipe (Silvio e Meiry), separados por vírgula em ADMIN_EMAILS. */
+/** E-mails da equipe interna, separados por vírgula em ADMIN_EMAILS. */
 export function ehAdmin(email: string) {
   const lista = (process.env.ADMIN_EMAILS ?? "")
     .split(",")

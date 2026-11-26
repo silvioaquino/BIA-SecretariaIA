@@ -7,7 +7,7 @@ import { buscarLugares, cidadeEBairro, type Lugar } from "./places";
 import { chave, cidadeAlvo, porteEstimado, telefone } from "./normalizar";
 import { pontuar } from "./pontuacao";
 
-// Status que a coleta pode mexer. Daqui para frente, quem manda é a Meiry/Silvio.
+// Status que a coleta pode mexer. Daqui para frente, quem manda é a equipe.
 const STATUS_AUTOMATICOS = ["novo", "descartado"];
 
 type Opcoes = { cidades?: readonly string[]; tipos?: Especialidade[]; maxPaginas?: number };
