@@ -1,0 +1,254 @@
+// Bia SaaS: modelo de dados (Fase 1)
+// Tabelas ficam no schema "public" do Supabase. O isolamento entre clínicas
+// é feito no código (todo acesso filtra por clinicaId do usuário logado).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Porte {
+  PEQUENA // 1-2 profissionais
+  MEDIA // 3-5
+  GRANDE // 6+
+}
+
+enum Produto {
+  CONFIRMA // confirmação D-1, lembrete D-0, alerta de remarcação, relatório
+  COMPLETA // tudo do Confirma + atendimento 24h com IA, agendamento, lista de espera, reativação
+}
+
+enum FonteAgenda {
+  PLANILHA // a recepção cola a agenda do dia seguinte numa planilha
+  GOOGLE // a Bia lê o Google Agenda
+}
+
+enum Especialidade {
+  ODONTOLOGIA
+  MEDICINA
+  OFTALMOLOGIA
+  OUTRA
+}
+
+enum StatusClinica {
+  CADASTRO // conta criada, onboarding em andamento
+  AGUARDANDO_PAGAMENTO // assinatura criada, 1ª cobrança em aberto
+  ATIVA
+  ATRASADA // cobrança vencida, dentro da carência (Bia continua respondendo)
+  BLOQUEADA // passou da carência ou estorno: Bia para de responder
+  CANCELADA
+}
+
+enum ModoAgenda {
+  DIRETO // Bia marca no Google Agenda
+  PRE // Bia coleta os dados e passa para a recepção
+}
+
+model Clinica {
+  id       String        @id @default(uuid()) @db.Uuid
+  nome     String
+  cpfCnpj  String        @unique
+  email    String
+  whatsapp String
+  cidade   String?
+  porte    Porte         @default(PEQUENA)
+  produto  Produto       @default(CONFIRMA)
+  status   StatusClinica @default(CADASTRO)
+
+  asaasCustomerId     String? @unique
+  asaasSubscriptionId String? @unique
+
+  // instância da Evolution ligada a esta clínica (Fase 2)
+  evolutionInstance String? @unique
+
+  inadimplenteDesde DateTime?
+  bloqueadaEm       DateTime?
+  aceiteTermosEm    DateTime?
+
+  criadaEm     DateTime @default(now())
+  atualizadaEm DateTime @updatedAt
+
+  usuarios      Usuario[]
+  config        ConfigBia?
+  profissionais Profissional[]
+  procedimentos Procedimento[]
+  pagamentos    Pagamento[]
+}
+
+model Usuario {
+  // mesmo id do usuário no Supabase Auth (auth.users.id)
+  id        String   @id @db.Uuid
+  email     String   @unique
+  nome      String
+  clinicaId String?  @db.Uuid
+  clinica   Clinica? @relation(fields: [clinicaId], references: [id], onDelete: Cascade)
+  criadoEm  DateTime @default(now())
+}
+
+model ConfigBia {
+  id        String  @id @default(uuid()) @db.Uuid
+  clinicaId String  @unique @db.Uuid
+  clinica   Clinica @relation(fields: [clinicaId], references: [id], onDelete: Cascade)
+
+  especialidade      Especialidade @default(ODONTOLOGIA)
+  nomeExibicao       String // como a Bia chama a clínica
+  endereco           String
+  linkMaps           String?
+  telefoneRecepcao   String // WhatsApp que recebe a passagem para humano
+  // ex.: { "seg": "08:00-18:00", "sab": "08:00-12:00", "dom": null }
+  horarios           Json
+  aceitaParticular   Boolean       @default(true)
+  convenios          String[]
+  formasPagamento    String[]
+  fonteAgenda        FonteAgenda   @default(PLANILHA) // de onde a Bia lê as consultas para confirmar
+  modoAgenda         ModoAgenda    @default(PRE) // só na Completa: como ela marca consultas
+  orientacoesGerais  String? // estacionamento, acessibilidade, chegar 15 min antes…
+  mensagemBoasVindas String?
+  informacoesExtras  String? // FAQ livre
+
+  completo     Boolean  @default(false)
+  atualizadaEm DateTime @updatedAt
+}
+
+model Profissional {
+  id            String  @id @default(uuid()) @db.Uuid
+  clinicaId     String  @db.Uuid
+  clinica       Clinica @relation(fields: [clinicaId], references: [id], onDelete: Cascade)
+  nome          String
+  especialidade String?
+  idAgenda      String? // id do Google Agenda (modo DIRETO)
+  atendimento   String? // dias/horários livres, ex.: "seg e qua à tarde"
+
+  @@index([clinicaId])
+}
+
+model Procedimento {
+  id          String   @id @default(uuid()) @db.Uuid
+  clinicaId   String   @db.Uuid
+  clinica     Clinica  @relation(fields: [clinicaId], references: [id], onDelete: Cascade)
+  nome        String
+  descricao   String?
+  duracaoMin  Int?
+  valor       Decimal? @db.Decimal(10, 2) // vazio = "valor na avaliação"
+  orientacoes String? // preparo: jejum, vir acompanhado…
+
+  @@index([clinicaId])
+}
+
+model Pagamento {
+  id             String    @id @default(uuid()) @db.Uuid
+  clinicaId      String    @db.Uuid
+  clinica        Clinica   @relation(fields: [clinicaId], references: [id], onDelete: Cascade)
+  asaasPaymentId String    @unique
+  tipo           String    @default("MENSALIDADE") // MENSALIDADE (da assinatura) ou IMPLANTACAO (avulsa)
+  valor          Decimal   @db.Decimal(10, 2)
+  status         String // status do Asaas: PENDING, RECEIVED, CONFIRMED, OVERDUE, REFUNDED…
+  billingType    String?
+  vencimento     DateTime  @db.Date
+  pagoEm         DateTime?
+  invoiceUrl     String?
+  criadoEm       DateTime  @default(now())
+  atualizadoEm   DateTime  @updatedAt
+
+  @@index([clinicaId])
+}
+
+// ───────────── Prospecção (uso interno: Silvio e Meiry) ─────────────
+
+enum TipoTelefone {
+  CELULAR
+  FIXO
+}
+
+// Clínica que ainda não é cliente. Alimentada pela coleta semanal do Google
+// Places (src/lib/prospeccao) e pela lista feita à mão na semana 1.
+model Prospect {
+  id      String  @id @default(uuid()) @db.Uuid
+  placeId String? @unique // id do Google Places: evita duplicar entre coletas
+  codigo  String? @unique // id da planilha da semana 1 ("001"…)
+  origem  String // "google" | "planilha"
+
+  tipo     Especialidade
+  nome     String
+  cidade   String
+  bairro   String?
+  endereco String?
+
+  telefone             String? // 55 + DDD + número
+  tipoTelefone         TipoTelefone?
+  temWhatsapp          Boolean? // null = ainda não verificado
+  whatsappVerificadoEm DateTime?
+
+  site      String?
+  instagram String?
+  mapsUrl   String?
+
+  nota          Float?
+  avaliacoes    Int?
+  porteEstimado Porte? // pelo nº de avaliações: só uma pista
+
+  pontuacao Int      @default(0) // 0 a 100
+  faixa     String   @default("C") // A (≥ 70) · B (45-69) · C (< 45)
+  motivos   String[] // por que ganhou ou perdeu pontos
+
+  // funil: novo → abordado → respondeu → conversa → proposta → piloto → cliente | perdido | descartado
+  status      String  @default("novo")
+  observacoes String?
+  extras      Json? // colunas da planilha que ainda não têm campo próprio
+
+  // contato (preenchido pela fila do dia)
+  canal             String? // whatsapp | ligacao | visita
+  tentativas        Int                 @default(0) // 1ª mensagem + follow-ups
+  primeiroContatoEm DateTime?
+  ultimoContatoEm   DateTime?
+  proximoContatoEm  DateTime? // follow-up devido, ou "não mostrar antes de" (pular hoje)
+  interacoes        InteracaoProspect[]
+
+  fechadaNoGoogle Boolean   @default(false)
+  vistoNoGoogleEm DateTime?
+  criadoEm        DateTime  @default(now())
+  atualizadoEm    DateTime  @updatedAt
+
+  @@index([status, pontuacao])
+  @@index([telefone])
+}
+
+// Histórico de cada contato: alimenta o relatório de sexta (Etapa 4).
+model InteracaoProspect {
+  id         String   @id @default(uuid()) @db.Uuid
+  prospectId String   @db.Uuid
+  prospect   Prospect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  acao       String // ex.: whatsapp_enviado, follow_up_1, ligou_nao_atendeu, respondeu…
+  statusDe   String
+  statusPara String
+  por        String // e-mail de quem registrou, "whatsapp" (webhook) ou "sistema"
+  detalhe    String? // trecho da mensagem recebida
+  mensagemId String?  @unique // id da mensagem no WhatsApp: o webhook pode chegar repetido
+  em         DateTime @default(now())
+
+  @@index([em])
+  @@index([prospectId])
+}
+
+model ColetaProspeccao {
+  id          String    @id @default(uuid()) @db.Uuid
+  iniciadaEm  DateTime  @default(now())
+  terminouEm  DateTime?
+  buscas      Int       @default(0) // chamadas feitas à Places API (cada página conta)
+  encontrados Int       @default(0) // resultados dentro das cidades-alvo
+  novos       Int       @default(0)
+  atualizados Int       @default(0)
+  erros       String[]
+}
+
+// Idempotência: o Asaas entrega webhooks "pelo menos uma vez".
+model WebhookEvento {
+  id         String   @id // id do evento no Asaas (evt_…)
+  tipo       String
+  payload    Json
+  recebidoEm DateTime @default(now())
+}
