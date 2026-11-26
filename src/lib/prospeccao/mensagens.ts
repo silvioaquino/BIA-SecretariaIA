@@ -26,9 +26,14 @@ export function nomeCurto(nome: string) {
 export function primeiraMensagem(p: Dados, remetente: string, agora = new Date()) {
   const extra = EXTRA[p.tipo];
   return [
-    `${saudacao(agora)}, tudo bem? Sou ${remetente}, da Bia. Trabalho com clínicas aqui de ${p.cidade}.`,
-    "Uma pergunta rápida para quem cuida da agenda: hoje vocês confirmam as consultas um dia antes? Quantos pacientes ainda faltam sem avisar por semana?",
-    `Pergunto porque montei um sistema que faz essa confirmação e a remarcação sozinho pelo WhatsApp da clínica. Estou buscando 3 clínicas aqui da região para um teste de 30 dias.${extra ? ` ${extra}` : ""}`,
+    `${saudacao(agora)}, tudo bem? Sou ${remetente}. Trabalho implantando a BIA-SecretariaIA em clínicas aqui de ${p.cidade}.`,
+    "Uma pergunta rápida para quem cuida da agenda:",
+    "Hoje vocês confirmam as consultas um dia antes?",
+    "Quantos pacientes ainda faltam sem avisar por semana?",
+    "Pergunto porque montei um sistema que faz essa confirmação sozinho pelo WhatsApp da clínica e também tem uma versão completa onde a BIA agenda, consulta, remarca, tira dúvidas 24h.",
+    "Estou buscando 3 clínicas aqui da região para um teste de 30 dias.",
+    ...(extra ? [extra] : []),
+    "Vocês têm interesse?",
   ].join("\n\n");
 }
 

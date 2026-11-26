@@ -13,7 +13,8 @@ export const instant = false;
 export default async function Prospeccao() {
   const admin = await exigirAdmin();
   await connection(); // usa a data de hoje: renderiza a cada acesso
-  const remetente = admin.nome.split(" ")[0] || "a equipe";
+  // nome completo (ex.: "Silvio Aquino"); se o cadastro não tiver nome, cai no e-mail: aí usa "a equipe"
+  const remetente = admin.nome.includes("@") ? "a equipe" : admin.nome.trim() || "a equipe";
   const hoje = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", timeZone: "America/Recife" });
 
   return (
