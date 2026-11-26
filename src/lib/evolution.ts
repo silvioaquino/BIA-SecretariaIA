@@ -16,9 +16,7 @@ export async function temWhatsapp(numeros: string[]): Promise<Map<string, boolea
   const base = process.env.EVOLUTION_URL!.replace(/\/$/, "");
   const instancia = encodeURIComponent(process.env.EVOLUTION_INSTANCIA!);
 
-  // lotes pequenos e espaçados: consulta não é mensagem, mas não vale chamar atenção
-  for (let i = 0; i < numeros.length; i += 20) {
-    const lote = numeros.slice(i, i + 20);
+  const consultar = async (lote: string[]) => {
     const res = await fetch(`${base}/chat/whatsappNumbers/${instancia}`, {
       method: "POST",
       cache: "no-store",
@@ -32,8 +30,30 @@ export async function temWhatsapp(numeros: string[]): Promise<Map<string, boolea
       const original = lote.find((n) => mesmoNumero(n, num));
       if (original) r.set(original, Boolean(item.exists));
     }
-    if (i + 20 < numeros.length) await new Promise((ok) => setTimeout(ok, 1500));
+  };
+  const pausa = (ms: number) => new Promise((ok) => setTimeout(ok, ms));
+
+  // lotes pequenos e espaçados: consulta não é mensagem, mas não vale chamar atenção
+  let falhas = 0;
+  for (let i = 0; i < numeros.length; i += 20) {
+    const lote = numeros.slice(i, i + 20);
+    try {
+      await consultar(lote);
+    } catch {
+      // a Evolution recusa o lote inteiro por causa de um número ruim (ou falha passageira):
+      // tenta um por um e pula só o que der erro
+      for (const n of lote) {
+        try {
+          await consultar([n]);
+        } catch {
+          falhas++;
+        }
+        await pausa(300);
+      }
+    }
+    if (i + 20 < numeros.length) await pausa(1500);
   }
+  if (falhas === numeros.length) throw new Error("Evolution recusou todas as consultas");
   return r;
 }
 
