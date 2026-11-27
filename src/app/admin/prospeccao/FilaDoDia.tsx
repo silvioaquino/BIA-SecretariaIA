@@ -52,7 +52,7 @@ export async function FilaDoDia({ remetente, alvoWhatsapp }: { remetente: string
   // ainda há clínicas além das que estão na tela?
   const temMais = f.whatsappDisponiveis > f.whatsapp.length;
   const proximoAlvo = f.metas.whatsapp.feitos + f.whatsapp.length + META_WHATSAPP;
-  const vazio = !f.negociacao.length && !f.respostas.length && !f.whatsapp.length && !f.ligacoes.length && !f.visitas.length && !f.followUps.length;
+  const vazio = !f.indicacoes.length && !f.negociacao.length && !f.respostas.length && !f.whatsapp.length && !f.ligacoes.length && !f.visitas.length && !f.followUps.length;
 
   return (
     <div className="space-y-10">
@@ -89,6 +89,25 @@ export async function FilaDoDia({ remetente, alvoWhatsapp }: { remetente: string
               modo="resposta"
               texto={ultima?.detalhe ?? "(resposta registrada à mão)"}
               rotuloTexto={quando ? `Mensagem de ${quando}` : "Resposta"}
+            />
+          );
+        }}
+      />
+      <Secao
+        titulo="Indicações"
+        ajuda="Clínicas que vocês adicionaram à mão. Não contam na meta: aborde quando quiser."
+        itens={f.indicacoes}
+        render={(p) => {
+          const temWhats = Boolean(p.telefone) && (p.temWhatsapp || (p.temWhatsapp == null && p.tipoTelefone === "CELULAR"));
+          return temWhats ? (
+            <CartaoProspect key={p.id} p={cartao(p)} modo="whatsapp" texto={primeiraMensagem(p, remetente)} rotuloTexto="Mensagem (pode editar antes de abrir)" />
+          ) : (
+            <CartaoProspect
+              key={p.id}
+              p={cartao(p)}
+              modo="ligacao"
+              texto={roteiroLigacao(p, remetente)}
+              rotuloTexto={p.telefone ? "Roteiro da ligação (sem WhatsApp)" : "Sem telefone: aborde por e-mail ou visita"}
             />
           );
         }}

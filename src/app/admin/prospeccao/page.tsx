@@ -3,6 +3,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { exigirAdmin } from "@/lib/sessao";
 import { FilaDoDia } from "./FilaDoDia";
+import { AdicionarClinica } from "./AdicionarClinica";
 
 export const metadata: Metadata = { title: "Prospecção · Bia", robots: { index: false } };
 
@@ -33,6 +34,9 @@ export default async function Prospeccao({ searchParams }: PageProps<"/admin/pro
           Tudo é enviado à mão, uma mensagem por vez, do WhatsApp comercial. Quem pedir para não receber mais: marque
           &quot;Sem interesse&quot;.
         </p>
+      </div>
+      <div className="mb-8">
+        <AdicionarClinica />
       </div>
       <FilaDoDia remetente={remetente} alvoWhatsapp={alvo} />
     </main>

@@ -78,7 +78,7 @@ export async function coletar(op: Opcoes = {}) {
         await prisma.prospect.update({
           where: { id: existente.id },
           // dados digitados à mão (instagram, observações, status) não são tocados
-          data: { ...dados, placeId: lugar.id, nome: existente.origem === "planilha" ? existente.nome : nome },
+          data: { ...dados, placeId: lugar.id, nome: existente.origem === "google" ? nome : existente.nome },
         });
         atualizados++;
       } else {
@@ -145,7 +145,8 @@ export async function repontuar() {
   for (const p of todos) {
     const tiposGoogle = ((p.extras as { tiposGoogle?: string[] } | null)?.tiposGoogle) ?? [];
     const r = pontuar({ ...p, tiposGoogle });
-    const status = STATUS_AUTOMATICOS.includes(p.status) ? (r.descartar ? "descartado" : "novo") : p.status;
+    // adicionada à mão pela equipe: nunca é descartada automaticamente
+    const status = STATUS_AUTOMATICOS.includes(p.status) && p.origem !== "manual" ? (r.descartar ? "descartado" : "novo") : p.status;
     await prisma.prospect.update({
       where: { id: p.id },
       data: { pontuacao: r.pontuacao, faixa: r.faixa, motivos: r.motivos, status },

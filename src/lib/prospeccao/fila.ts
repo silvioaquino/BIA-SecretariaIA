@@ -179,6 +179,7 @@ export async function montarFila(agora = new Date(), alvoWhatsapp = META_WHATSAP
 
   const disponivel: Prisma.ProspectWhereInput = {
     status: "novo",
+    origem: { not: "manual" }, // adicionadas à mão vão para "Indicações", fora da meta
     OR: [{ proximoContatoEm: null }, { proximoContatoEm: { lte: agora } }],
   };
   const paraWhatsapp: Prisma.ProspectWhereInput = {
@@ -192,7 +193,13 @@ export async function montarFila(agora = new Date(), alvoWhatsapp = META_WHATSAP
   };
   const ordem: Prisma.ProspectOrderByWithRelationInput[] = [{ pontuacao: "desc" }, { avaliacoes: { sort: "desc", nulls: "last" } }];
 
-  const [negociacao, respostas, whatsapp, ligacoes, visitas, followUps, funil] = await Promise.all([
+  const [indicacoes, negociacao, respostas, whatsapp, ligacoes, visitas, followUps, funil] = await Promise.all([
+    // adicionadas à mão (indicação): todas aparecem, sem limite de meta
+    prisma.prospect.findMany({
+      where: { status: "novo", origem: "manual", OR: [{ proximoContatoEm: null }, { proximoContatoEm: { lte: agora } }] },
+      orderBy: { criadoEm: "desc" },
+      select: SELECAO,
+    }),
     // já conversando: avançar no funil (proposta → piloto → cliente)
     prisma.prospect.findMany({
       where: { status: { in: ["conversa", "proposta", "piloto"] } },
@@ -241,6 +248,7 @@ export async function montarFila(agora = new Date(), alvoWhatsapp = META_WHATSAP
   const whatsappDisponiveis = await prisma.prospect.count({ where: paraWhatsapp });
 
   return {
+    indicacoes,
     negociacao,
     respostas,
     whatsapp,
