@@ -36,7 +36,7 @@ const COR_FAIXA: Record<string, string> = {
 // Botões de resultado por tipo de contato. O 1º é o caminho feliz.
 const RESULTADOS: Record<Modo, Acao[]> = {
   negociacao: ["proposta_enviada", "fechou_piloto", "virou_cliente", "sem_interesse"],
-  resposta: ["virou_conversa", "sem_interesse"],
+  resposta: ["virou_conversa", "sem_resposta_concreta", "sem_interesse"],
   whatsapp: ["whatsapp_enviado", "numero_errado", "pular"],
   follow_up: ["follow_up_enviado", "respondeu", "sem_interesse"],
   ligacao: ["ligou_falou", "ligou_nao_atendeu", "sem_interesse", "numero_errado", "pular"],
@@ -47,6 +47,7 @@ const ROTULO: Record<Acao, string> = {
   whatsapp_enviado: "✓ Enviei",
   follow_up_enviado: "✓ Enviei o follow-up",
   respondeu: "Já respondeu",
+  sem_resposta_concreta: "Ainda sem resposta concreta",
   virou_conversa: "✓ Já respondi, estamos conversando",
   proposta_enviada: "Proposta enviada",
   fechou_piloto: "Fechou o piloto 🎉",

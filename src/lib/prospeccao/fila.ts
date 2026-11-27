@@ -17,6 +17,7 @@ export const ACOES = {
   whatsapp_enviado: "Enviei a mensagem",
   follow_up_enviado: "Enviei o follow-up",
   respondeu: "Respondeu",
+  sem_resposta_concreta: "Ainda sem resposta concreta",
   virou_conversa: "Conversa em andamento",
   proposta_enviada: "Proposta enviada",
   fechou_piloto: "Fechou o piloto",
@@ -65,6 +66,20 @@ export async function registrar(
     case "respondeu":
       data = { ...contato, status: "respondeu", proximoContatoEm: null };
       break;
+    case "sem_resposta_concreta": {
+      // saudação ou mensagem automática: volta a esperar resposta, com os follow-ups contando
+      // a partir do último envio (se já venceu, aparece hoje nos follow-ups)
+      const ultimoEnvio = await prisma.interacaoProspect.findFirst({
+        where: { prospectId: p.id, acao: { in: ["whatsapp_enviado", "follow_up_enviado"] } },
+        orderBy: { em: "desc" },
+        select: { em: true },
+      });
+      const t = Math.max(1, p.tentativas);
+      const dias = DIAS_FOLLOW_UP[Math.min(t - 1, DIAS_FOLLOW_UP.length - 1)];
+      const base = inicioDoDia(ultimoEnvio?.em ?? agora).getTime();
+      data = { status: "abordado", canal: p.canal ?? "whatsapp", tentativas: t, proximoContatoEm: new Date(base + dias * DIA_MS) };
+      break;
+    }
     case "virou_conversa":
       data = { ...contato, status: "conversa", proximoContatoEm: null };
       break;

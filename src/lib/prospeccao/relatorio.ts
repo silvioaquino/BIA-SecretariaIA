@@ -51,7 +51,8 @@ export async function gerarRelatorio(agora = new Date()) {
       followUps: n("follow_up_enviado"),
       ligacoes: n("ligou_falou", "ligou_nao_atendeu"),
       visitas: n("visitou_conversou", "visitou_voltar"),
-      respostas: n("respondeu"),
+      // saudação/mensagem automática marcada pela equipe não conta como resposta
+      respostas: Math.max(0, n("respondeu") - n("sem_resposta_concreta")),
       conversas: n("virou_conversa", "ligou_falou", "visitou_conversou"),
       propostas: n("proposta_enviada"),
       pilotos: n("fechou_piloto"),
@@ -75,7 +76,13 @@ export async function gerarRelatorio(agora = new Date()) {
   const porCidade = new Map<string, Linha>();
   const porCanal = new Map<string, Linha>();
   for (const p of abordadas) {
-    const fundo = Math.max(PROFUNDIDADE_STATUS[p.status] ?? 0, ...p.interacoes.map((i) => PROFUNDIDADE_ACAO[i.acao] ?? 0));
+    // cada "ainda sem resposta concreta" anula um "respondeu" (era saudação ou mensagem automática)
+    const conta = (a: string) => p.interacoes.filter((i) => i.acao === a).length;
+    const respostasReais = conta("respondeu") - conta("sem_resposta_concreta");
+    const fundo = Math.max(
+      PROFUNDIDADE_STATUS[p.status] ?? 0,
+      ...p.interacoes.map((i) => (i.acao === "respondeu" && respostasReais <= 0 ? 0 : (PROFUNDIDADE_ACAO[i.acao] ?? 0))),
+    );
     for (const [mapa, chave] of [[porTipo, p.tipo], [porCidade, p.cidade], [porCanal, NOME_CANAL[p.canal ?? ""] ?? "Outro"]] as const) {
       const m = mapa as Map<string, Linha>;
       if (!m.has(chave)) m.set(chave, vazia());
