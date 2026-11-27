@@ -38,6 +38,28 @@ export function primeiraMensagem(p: Dados, remetente: string, agora = new Date()
   ].join("\n\n");
 }
 
+/**
+ * Abordagem por e-mail: mesma ideia da 1ª mensagem do WhatsApp, num formato de e-mail.
+ * `nome` vazio = e-mail genérico ("Olá, equipe da clínica").
+ */
+export function emailAbordagem(p: { nome?: string; cidade: string; tipo: Especialidade }, remetente: string, site: string) {
+  const clinica = p.nome?.trim() ? nomeCurto(p.nome) : "";
+  const extra = EXTRA[p.tipo];
+  const assunto = clinica ? `Confirmação automática de consultas para a ${clinica}` : "Menos faltas na agenda da clínica, pelo WhatsApp";
+  const corpo = [
+    `Olá, equipe${clinica ? ` da ${clinica}` : " da clínica"}, tudo bem?`,
+    `Meu nome é ${remetente} e trabalho implantando a BIA-SecretariaIA em clínicas aqui de ${p.cidade}.`,
+    "Uma pergunta rápida para quem cuida da agenda: hoje vocês confirmam as consultas um dia antes? E quantos pacientes ainda faltam sem avisar por semana?",
+    "Pergunto porque montei um sistema que faz essa confirmação sozinho, pelo próprio WhatsApp da clínica. Um dia antes, a BIA manda a mensagem para cada paciente. Quem precisa remarcar avisa ali mesmo, e a recepção fica sabendo na hora, a tempo de encaixar outro paciente no horário.",
+    "Também existe a versão completa, em que a BIA agenda, consulta, remarca e tira dúvidas dos pacientes 24h.",
+    ...(extra ? [extra] : []),
+    "Estou buscando 3 clínicas aqui da região para um teste de 30 dias. Se fizer sentido, mostro como funciona em 10 minutos, por vídeo ou passando aí na clínica.",
+    "Vocês têm interesse?",
+    `Um abraço,\n${remetente}\nBIA-SecretariaIA · ${site}`,
+  ].join("\n\n");
+  return { assunto, corpo };
+}
+
 /** Follow-ups (roteiro, seção 7): 3 dias e 7 dias depois. */
 export function followUp(n: 1 | 2, p: Dados) {
   if (n === 1) {

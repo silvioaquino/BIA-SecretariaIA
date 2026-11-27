@@ -16,6 +16,7 @@ export default async function LayoutAdmin({ children }: { children: React.ReactN
           <nav className="flex flex-wrap items-center gap-5 text-sm font-semibold">
             <Link href="/admin" className="hover:text-bia">Visão geral</Link>
             <Link href="/admin/prospeccao" className="hover:text-bia">Prospecção</Link>
+            <Link href="/admin/prospeccao/email" className="hover:text-bia">E-mail</Link>
             <Link href="/admin/prospeccao/relatorio" className="hover:text-bia">Relatório</Link>
             <form action={sair}>
               <button className="text-slate-500 hover:text-coral">Sair</button>
