@@ -31,6 +31,9 @@ export async function exigirUsuario() {
   return usuario;
 }
 
+/** Página inicial da equipe interna. */
+export const INICIO_EQUIPE = "/admin/prospeccao";
+
 /** E-mails da equipe interna, separados por vírgula em ADMIN_EMAILS. */
 export function ehAdmin(email: string) {
   const lista = (process.env.ADMIN_EMAILS ?? "")
@@ -50,6 +53,6 @@ export async function exigirAdmin() {
 /** Exige usuário com clínica cadastrada; devolve a clínica com config. */
 export async function exigirClinica() {
   const usuario = await exigirUsuario();
-  if (!usuario.clinica) redirect("/onboarding");
+  if (!usuario.clinica) redirect(ehAdmin(usuario.email) ? INICIO_EQUIPE : "/onboarding");
   return { usuario, clinica: usuario.clinica };
 }

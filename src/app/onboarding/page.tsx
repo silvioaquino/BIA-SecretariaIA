@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { Marca } from "@/components/Marca";
 import { FormBia } from "@/components/FormBia";
-import { exigirUsuario } from "@/lib/sessao";
+import { ehAdmin, exigirUsuario, INICIO_EQUIPE } from "@/lib/sessao";
 import { valoresFormBia } from "@/lib/valoresFormBia";
 import { lerPorte, lerProduto } from "@/lib/formTipos";
 
@@ -10,6 +10,8 @@ export const instant = false;
 
 export default async function Onboarding({ searchParams }: PageProps<"/onboarding">) {
   const usuario = await exigirUsuario();
+  // equipe sem clínica (link antigo, botão "começar"…): vai para a prospecção
+  if (!usuario.clinica && ehAdmin(usuario.email)) redirect(INICIO_EQUIPE);
   // já configurou: edição fica no painel
   if (usuario.clinica?.config?.completo) redirect("/painel");
 

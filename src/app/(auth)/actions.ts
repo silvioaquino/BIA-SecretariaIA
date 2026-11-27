@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { criarSupabaseServidor } from "@/lib/supabase/server";
 import { lerPorte, lerProduto } from "@/lib/formTipos";
+import { ehAdmin, INICIO_EQUIPE } from "@/lib/sessao";
 
 export type EstadoForm = { erro?: string; ok?: string } | undefined;
 
@@ -28,7 +29,8 @@ export async function cadastrar(_: EstadoForm, form: FormData): Promise<EstadoFo
   const porte = lerPorte(form.get("porte"));
   if (produto) plano.set("produto", produto);
   if (porte) plano.set("porte", porte);
-  const destino = `/onboarding${plano.size ? `?${plano}` : ""}`;
+  // a equipe (ADMIN_EMAILS) não cadastra clínica: vai direto para a prospecção
+  const destino = ehAdmin(dados.data.email) ? INICIO_EQUIPE : `/onboarding${plano.size ? `?${plano}` : ""}`;
 
   const origem = (await headers()).get("origin") ?? process.env.APP_URL;
   const supabase = await criarSupabaseServidor();
@@ -62,7 +64,7 @@ export async function entrar(_: EstadoForm, form: FormData): Promise<EstadoForm>
     password: dados.data.senha,
   });
   if (error) return { erro: traduzirErro(error.message) };
-  redirect("/painel");
+  redirect(ehAdmin(dados.data.email) ? INICIO_EQUIPE : "/painel");
 }
 
 export async function sair() {
