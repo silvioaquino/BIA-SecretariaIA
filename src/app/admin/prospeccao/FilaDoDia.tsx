@@ -4,6 +4,7 @@ import { META_WHATSAPP } from "@/lib/prospeccao/config";
 import { montarFila, type ItemFila } from "@/lib/prospeccao/fila";
 import { followUp, primeiraMensagem, roteiroLigacao, roteiroVisita } from "@/lib/prospeccao/mensagens";
 import { CartaoProspect, type DadosCartao } from "./CartaoProspect";
+import { Aba, AbasSecoes } from "./Abas";
 
 const PORTE: Record<string, string> = { PEQUENA: "Pequena", MEDIA: "Média", GRANDE: "Grande" };
 
@@ -75,7 +76,21 @@ export async function FilaDoDia({ remetente, alvoWhatsapp }: { remetente: string
         </p>
       )}
 
+      <AbasSecoes
+        inicial={alvoWhatsapp ? "whatsapp" : undefined}
+        abas={[
+          { id: "respostas", rotulo: "Responderam", total: f.respostas.length },
+          { id: "aguardando", rotulo: "Aguardando", total: f.aguardandoConcreta.length },
+          { id: "indicacoes", rotulo: "Indicações", total: f.indicacoes.length },
+          { id: "negociacao", rotulo: "Negociação", total: f.negociacao.length },
+          { id: "follow-ups", rotulo: "Follow-ups", total: f.followUps.length },
+          { id: "whatsapp", rotulo: "WhatsApp", total: f.whatsapp.length || (temMais ? 1 : 0) },
+          { id: "ligacoes", rotulo: "Ligações", total: f.ligacoes.length },
+          { id: "visitas", rotulo: "Visitas", total: f.visitas.length },
+        ]}
+      >
       <Secao
+        id="respostas"
         titulo="Responderam: responda primeiro"
         ajuda="Chegaram pelo WhatsApp comercial. Responda lá e marque aqui quando a conversa estiver andando."
         itens={f.respostas}
@@ -94,6 +109,7 @@ export async function FilaDoDia({ remetente, alvoWhatsapp }: { remetente: string
         }}
       />
       <Secao
+        id="aguardando"
         titulo="Aguardando resposta concreta"
         ajuda="Responderam com saudação ou mensagem automática. Continuam aqui até responderem de verdade (aí voltam para Responderam) ou até vocês marcarem."
         itens={f.aguardandoConcreta}
@@ -112,6 +128,7 @@ export async function FilaDoDia({ remetente, alvoWhatsapp }: { remetente: string
         }}
       />
       <Secao
+        id="indicacoes"
         titulo="Indicações"
         ajuda="Clínicas que vocês adicionaram à mão. Não contam na meta: aborde quando quiser."
         itens={f.indicacoes}
@@ -131,6 +148,7 @@ export async function FilaDoDia({ remetente, alvoWhatsapp }: { remetente: string
         }}
       />
       <Secao
+        id="negociacao"
         titulo="Em negociação"
         ajuda="Já conversando. Marque cada avanço: é o que mede o funil no relatório de sexta."
         itens={f.negociacao}
@@ -145,6 +163,7 @@ export async function FilaDoDia({ remetente, alvoWhatsapp }: { remetente: string
         )}
       />
       <Secao
+        id="follow-ups"
         titulo="Follow-ups de hoje"
         ajuda="Quem não respondeu à primeira mensagem. 1º follow-up no 3º dia; no 2º (7º dia), anexe o vídeo da demo do tipo de clínica."
         itens={f.followUps}
@@ -161,6 +180,7 @@ export async function FilaDoDia({ remetente, alvoWhatsapp }: { remetente: string
         render={(p) => <CartaoProspect key={p.id} p={cartao(p)} modo="whatsapp" texto={primeiraMensagem(p, remetente)} rotuloTexto="Mensagem (pode editar antes de abrir)" />}
       />
       {temMais && (
+        <Aba id="whatsapp">
         <div id="mais-whatsapp" className="flex scroll-mt-6 flex-wrap items-center justify-between gap-3 rounded-2xl bg-menta-clara px-5 py-4">
           <p className="text-sm">
             {f.whatsapp.length
@@ -174,14 +194,17 @@ export async function FilaDoDia({ remetente, alvoWhatsapp }: { remetente: string
             Carregar mais {META_WHATSAPP}
           </Link>
         </div>
+        </Aba>
       )}
       <Secao
+        id="ligacoes"
         titulo="Ligações"
         ajuda="Telefone fixo ou sem WhatsApp. Melhor horário: 9h às 11h30 e 14h às 17h."
         itens={f.ligacoes}
         render={(p) => <CartaoProspect key={p.id} p={cartao(p)} modo="ligacao" texto={roteiroLigacao(p, remetente)} rotuloTexto="Roteiro da ligação" />}
       />
       <Secao
+        id="visitas"
         titulo="Visitas · Rota 3"
         ajuda="Itapissuma e Itamaracá. Melhor horário da visita: 11h30 às 12h ou 17h30 às 18h. Enquanto não der para ir, quem tem WhatsApp ou e-mail já pode ser abordado pelo cartão."
         itens={f.visitas}
@@ -197,6 +220,7 @@ export async function FilaDoDia({ remetente, alvoWhatsapp }: { remetente: string
           />
         )}
       />
+      </AbasSecoes>
     </div>
   );
 }
@@ -217,10 +241,11 @@ function Meta({ rotulo, feitos, meta }: { rotulo: string; feitos: number; meta: 
   );
 }
 
-function Secao({ id, titulo, ajuda, itens, render }: { id?: string; titulo: string; ajuda: string; itens: ItemFila[]; render: (p: ItemFila) => React.ReactNode }) {
+function Secao({ id, titulo, ajuda, itens, render }: { id: string; titulo: string; ajuda: string; itens: ItemFila[]; render: (p: ItemFila) => React.ReactNode }) {
   if (!itens.length) return null;
   return (
-    <section id={id} className="scroll-mt-6">
+    <Aba id={id}>
+    <section id={id} className="scroll-mt-16">
       <div className="mb-3">
         <h2 className="text-xl font-bold">
           {titulo} <span className="text-base font-normal text-slate-400">({itens.length})</span>
@@ -229,5 +254,6 @@ function Secao({ id, titulo, ajuda, itens, render }: { id?: string; titulo: stri
       </div>
       <div className="grid gap-4 lg:grid-cols-2">{itens.map(render)}</div>
     </section>
+    </Aba>
   );
 }
