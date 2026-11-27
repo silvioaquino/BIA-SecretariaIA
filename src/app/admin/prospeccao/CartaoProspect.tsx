@@ -27,7 +27,7 @@ export type DadosCartao = {
   porte: string | null;
 };
 
-export type Modo = "negociacao" | "resposta" | "whatsapp" | "follow_up" | "ligacao" | "visita";
+export type Modo = "negociacao" | "resposta" | "aguardando" | "whatsapp" | "follow_up" | "ligacao" | "visita";
 
 const EMOJI: Record<string, string> = { ODONTOLOGIA: "🦷", MEDICINA: "🩺", OFTALMOLOGIA: "👁️", OUTRA: "🏥" };
 const COR_FAIXA: Record<string, string> = {
@@ -40,6 +40,7 @@ const COR_FAIXA: Record<string, string> = {
 const RESULTADOS: Record<Modo, Acao[]> = {
   negociacao: ["proposta_enviada", "fechou_piloto", "virou_cliente", "sem_interesse"],
   resposta: ["virou_conversa", "sem_resposta_concreta", "sem_interesse"],
+  aguardando: ["virou_conversa", "sem_interesse"],
   whatsapp: ["whatsapp_enviado", "numero_errado", "pular"],
   follow_up: ["follow_up_enviado", "respondeu", "sem_interesse"],
   ligacao: ["ligou_falou", "ligou_nao_atendeu", "sem_interesse", "numero_errado", "pular"],
@@ -93,7 +94,7 @@ export function CartaoProspect({
   const [copiado, setCopiado] = useState(false);
 
   const enviarPorWhats = modo === "whatsapp" || modo === "follow_up";
-  const resposta = modo === "resposta" || modo === "negociacao";
+  const resposta = modo === "resposta" || modo === "aguardando" || modo === "negociacao";
   const tel = p.telefone ? formatarTelefone(p.telefone) : null;
 
   function marcar(acao: Acao) {

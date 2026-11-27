@@ -193,7 +193,16 @@ export async function montarFila(agora = new Date(), alvoWhatsapp = META_WHATSAP
   };
   const ordem: Prisma.ProspectOrderByWithRelationInput[] = [{ pontuacao: "desc" }, { avaliacoes: { sort: "desc", nulls: "last" } }];
 
-  const [indicacoes, negociacao, respostas, whatsapp, ligacoes, visitas, followUps, funil] = await Promise.all([
+  const ultimaMensagem = {
+    interacoes: { where: { detalhe: { not: null }, por: "whatsapp" }, orderBy: { em: "desc" as const }, take: 1, select: { detalhe: true, em: true } },
+  };
+  const [aguardandoConcreta, indicacoes, negociacao, respostas, whatsapp, ligacoes, visitas, followUps, funil] = await Promise.all([
+    // marcadas "ainda sem resposta concreta": continuam visíveis até responderem de verdade
+    prisma.prospect.findMany({
+      where: { status: "abordado", interacoes: { some: { acao: "sem_resposta_concreta" } } },
+      orderBy: { ultimoContatoEm: "desc" },
+      select: { ...SELECAO, ...ultimaMensagem },
+    }),
     // adicionadas à mão (indicação): todas aparecem, sem limite de meta
     prisma.prospect.findMany({
       where: { status: "novo", origem: "manual", OR: [{ proximoContatoEm: null }, { proximoContatoEm: { lte: agora } }] },
@@ -248,6 +257,7 @@ export async function montarFila(agora = new Date(), alvoWhatsapp = META_WHATSAP
   const whatsappDisponiveis = await prisma.prospect.count({ where: paraWhatsapp });
 
   return {
+    aguardandoConcreta,
     indicacoes,
     negociacao,
     respostas,

@@ -52,7 +52,7 @@ export async function FilaDoDia({ remetente, alvoWhatsapp }: { remetente: string
   // ainda há clínicas além das que estão na tela?
   const temMais = f.whatsappDisponiveis > f.whatsapp.length;
   const proximoAlvo = f.metas.whatsapp.feitos + f.whatsapp.length + META_WHATSAPP;
-  const vazio = !f.indicacoes.length && !f.negociacao.length && !f.respostas.length && !f.whatsapp.length && !f.ligacoes.length && !f.visitas.length && !f.followUps.length;
+  const vazio = !f.aguardandoConcreta.length && !f.indicacoes.length && !f.negociacao.length && !f.respostas.length && !f.whatsapp.length && !f.ligacoes.length && !f.visitas.length && !f.followUps.length;
 
   return (
     <div className="space-y-10">
@@ -89,6 +89,24 @@ export async function FilaDoDia({ remetente, alvoWhatsapp }: { remetente: string
               modo="resposta"
               texto={ultima?.detalhe ?? "(resposta registrada à mão)"}
               rotuloTexto={quando ? `Mensagem de ${quando}` : "Resposta"}
+            />
+          );
+        }}
+      />
+      <Secao
+        titulo="Aguardando resposta concreta"
+        ajuda="Responderam com saudação ou mensagem automática. Continuam aqui até responderem de verdade (aí voltam para Responderam) ou até vocês marcarem."
+        itens={f.aguardandoConcreta}
+        render={(p) => {
+          const ultima = f.aguardandoConcreta.find((r) => r.id === p.id)?.interacoes[0];
+          const quando = ultima?.em.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "America/Recife" });
+          return (
+            <CartaoProspect
+              key={p.id}
+              p={cartao(p)}
+              modo="aguardando"
+              texto={ultima?.detalhe ?? "(sem texto da mensagem)"}
+              rotuloTexto={quando ? `Última mensagem, ${quando}` : "Última mensagem"}
             />
           );
         }}
