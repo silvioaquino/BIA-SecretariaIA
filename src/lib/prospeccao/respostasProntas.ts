@@ -34,7 +34,8 @@ export const RESPOSTAS_PRONTAS: RespostaPronta[] = [
       [
         "Vou ser bem transparente com você:",
         `o teste de 30 dias tem um valor pequeno, ${precoPiloto(p.porte)}, pago no início.`,
-        "E tem garantia: se as faltas não diminuírem nesses 30 dias, eu devolvo o valor inteiro.",
+        "E tem garantia: nos primeiros 7 dias, se não gostar por qualquer motivo, eu devolvo o valor inteiro.",
+        "Com 30 dias, a gente senta junto e compara as faltas de antes e de depois da BIA, para você decidir se continua.",
         "Para comparar: normalmente 1 ou 2 faltas evitadas já pagam o mês.",
         "Antes de qualquer decisão, posso te mostrar como funciona em 10 minutos, sem compromisso. Quer marcar?",
       ].join("\n\n"),
@@ -55,7 +56,7 @@ export const RESPOSTAS_PRONTAS: RespostaPronta[] = [
     texto: (p) =>
       [
         "Que bom que gostou! E não ter convênio não é problema: a BIA funciona para atendimento particular, onde cada falta pesa ainda mais no caixa.",
-        `Sobre custo, sendo transparente: o teste de 30 dias tem um valor pequeno, ${precoPiloto(p.porte)}, pago no início. E se as faltas não diminuírem nesses 30 dias, eu devolvo o valor inteiro.`,
+        `Sobre custo, sendo transparente: o teste de 30 dias tem um valor pequeno, ${precoPiloto(p.porte)}, pago no início. Nos primeiros 7 dias, se não gostar, eu devolvo o valor inteiro. E com 30 dias a gente compara as faltas de antes e de depois para você decidir se continua.`,
         "Antes de qualquer decisão, posso te mostrar como funciona em 10 minutos, sem compromisso nenhum. Pode ser por vídeo ou passo aí. Qual fica melhor pra você?",
       ].join("\n\n"),
   },

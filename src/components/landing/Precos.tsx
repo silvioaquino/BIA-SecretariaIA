@@ -77,7 +77,7 @@ export function Precos() {
         })}
       </div>
       <p className="mt-8 text-center text-sm text-slate-600">
-        Pix ou cartão · Sem fidelidade · Cancele quando quiser · <strong>Garantia de 30 dias</strong>
+        Pix ou cartão · Sem fidelidade · Cancele quando quiser · <strong>7 dias de garantia</strong>
       </p>
     </div>
   );

@@ -61,7 +61,7 @@ export default async function Assinatura() {
         <ul className="mx-auto mt-6 max-w-xs space-y-1 text-left text-sm text-slate-700">
           <li>✓ Pagamento por Pix, com QR Code aqui mesmo</li>
           <li>✓ A Bia é ativada assim que o pagamento cai</li>
-          <li>✓ Garantia de 30 dias</li>
+          <li>✓ 7 dias de garantia: não gostou, devolvemos 100%</li>
         </ul>
         <div className="mt-8">
           <BotaoAcao acao={assinar} texto={`Gerar Pix de ${brl(hoje)}`} pendente="Gerando cobrança…" />

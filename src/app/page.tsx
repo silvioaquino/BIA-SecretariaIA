@@ -11,7 +11,7 @@ import { CUSTO_RECEPCIONISTA, PRODUTOS, brl } from "@/lib/planos";
 export const metadata: Metadata = {
   title: "Bia · Secretária IA | Menos faltas na sua clínica, pelo WhatsApp",
   description:
-    "A Bia confirma as consultas no WhatsApp, avisa a recepção quando alguém remarca e atende seus pacientes 24h. Para clínicas odontológicas, médicas e de oftalmologia. A partir de R$ 197/mês, com garantia de 30 dias.",
+    "A Bia confirma as consultas no WhatsApp, avisa a recepção quando alguém remarca e atende seus pacientes 24h. Para clínicas odontológicas, médicas e de oftalmologia. A partir de R$ 197/mês, com 7 dias de garantia.",
   openGraph: {
     title: "Bia · Secretária IA para clínicas",
     description: "Paciente que confirma aparece. Confirmação automática no WhatsApp, a partir de R$ 197/mês.",
@@ -69,7 +69,7 @@ export default function Landing() {
               </a>
             </div>
             <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-menta-clara">
-              {["Pronta no mesmo dia", "Sem trocar seu sistema", "Sem fidelidade", "Garantia de 30 dias"].map((t) => (
+              {["Pronta no mesmo dia", "Sem trocar seu sistema", "Sem fidelidade", "7 dias de garantia"].map((t) => (
                 <li key={t} className="flex items-center gap-1.5"><Check claro /> {t}</li>
               ))}
             </ul>
@@ -269,13 +269,17 @@ export default function Landing() {
       <section className="mx-auto max-w-4xl px-5 py-20 lg:py-28">
         <div className="flex flex-col items-center gap-8 rounded-3xl bg-menta-clara p-8 text-center sm:flex-row sm:p-12 sm:text-left">
           <div className="flex h-32 w-32 shrink-0 flex-col items-center justify-center rounded-full bg-bia text-white shadow-lg ring-8 ring-white">
-            <span className="text-4xl font-bold leading-none">30</span>
+            <span className="text-4xl font-bold leading-none">7</span>
             <span className="etiqueta text-[10px] text-menta">dias</span>
           </div>
           <div>
-            <h2 className="text-2xl font-bold sm:text-3xl">Garantia de 30 dias. O risco é nosso.</h2>
+            <h2 className="text-2xl font-bold sm:text-3xl">7 dias de garantia. Não gostou, devolvemos.</h2>
             <p className="mt-3 text-lg text-slate-700">
-              Se em 30 dias as faltas da sua clínica não diminuírem, devolvemos o valor pago. É só pedir.
+              Nos primeiros 7 dias, se não gostar por qualquer motivo, devolvemos 100% do valor pago. É só pedir.
+            </p>
+            <p className="mt-2 text-slate-600">
+              E com 30 dias fazemos juntos a análise de resultado: comparamos as faltas de antes e de depois da Bia, e você
+              decide se continua. Sem fidelidade e sem multa.
             </p>
           </div>
         </div>
@@ -317,7 +321,7 @@ export default function Landing() {
           <Image src="/bia.png" alt="" width={72} height={72} className="mx-auto rounded-full ring-4 ring-white/30" />
           <h2 className="mt-6 text-3xl font-bold tracking-tight sm:text-5xl">Amanhã tem consulta marcada. Vai todo mundo?</h2>
           <p className="mx-auto mt-5 max-w-xl text-lg text-menta-clara">
-            Comece hoje. Em 10 minutos a Bia já sabe tudo sobre a sua clínica, e você tem 30 dias de garantia.
+            Comece hoje. Em 10 minutos a Bia já sabe tudo sobre a sua clínica, e você tem 7 dias de garantia.
           </p>
           <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
             <a href="#precos" className="inline-flex justify-center rounded-xl bg-white px-8 py-4 font-bold text-bia-escuro shadow-lg transition hover:bg-menta-clara">

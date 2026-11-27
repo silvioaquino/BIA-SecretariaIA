@@ -35,7 +35,7 @@ A ordem das seções segue o roteiro clássico de página que vende: problema �
 7. Preços com seletor de tamanho. O CTA leva o plano até o cadastro (`/cadastro?produto=&porte=`).
 8. Comparação com uma recepcionista extra (ancoragem de preço).
 9. Segurança e LGPD.
-10. Garantia de 30 dias.
+10. Garantia de 7 dias (devolução de 100%) e análise de resultado com 30 dias.
 11. Perguntas frequentes (quebra de objeções).
 12. CTA final.
 13. Botão fixo no celular.
