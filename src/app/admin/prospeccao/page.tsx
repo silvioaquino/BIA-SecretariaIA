@@ -9,11 +9,14 @@ export const metadata: Metadata = { title: "Prospecção · Bia", robots: { inde
 // área interna: depende de quem está logado
 export const instant = false;
 
-export default async function Prospeccao() {
+export default async function Prospeccao({ searchParams }: PageProps<"/admin/prospeccao">) {
   const admin = await exigirAdmin();
   await connection(); // usa a data de hoje: renderiza a cada acesso
   // nome completo (ex.: "Silvio Aquino"); se o cadastro não tiver nome, cai no e-mail: aí usa "a equipe"
   const remetente = admin.nome.includes("@") ? "a equipe" : admin.nome.trim() || "a equipe";
+  // ?mais=20: o botão "carregar mais 10" pediu mais mensagens para hoje
+  const { mais } = await searchParams;
+  const alvo = Math.min(200, Number(mais) || 0) || undefined;
   const hoje = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", timeZone: "America/Recife" });
 
   return (
@@ -31,7 +34,7 @@ export default async function Prospeccao() {
           &quot;Sem interesse&quot;.
         </p>
       </div>
-      <FilaDoDia remetente={remetente} />
+      <FilaDoDia remetente={remetente} alvoWhatsapp={alvo} />
     </main>
   );
 }

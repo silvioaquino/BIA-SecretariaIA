@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { connection } from "next/server";
+import { META_WHATSAPP } from "@/lib/prospeccao/config";
 import { montarFila, type ItemFila } from "@/lib/prospeccao/fila";
 import { followUp, primeiraMensagem, roteiroLigacao, roteiroVisita } from "@/lib/prospeccao/mensagens";
 import { CartaoProspect, type DadosCartao } from "./CartaoProspect";
@@ -39,10 +41,16 @@ function cartao(p: ItemFila): DadosCartao {
   };
 }
 
-/** A fila do dia. `remetente` é o primeiro nome de quem está usando (vai na mensagem). */
-export async function FilaDoDia({ remetente }: { remetente: string }) {
+/**
+ * A fila do dia. `remetente` é o nome de quem está usando (vai na mensagem).
+ * `alvoWhatsapp`: total de 1ªs mensagens do dia (sobe de 10 em 10 com o botão "carregar mais 10").
+ */
+export async function FilaDoDia({ remetente, alvoWhatsapp }: { remetente: string; alvoWhatsapp?: number }) {
   await connection(); // depende da hora atual: nunca pré-renderizar
-  const f = await montarFila();
+  const f = await montarFila(undefined, alvoWhatsapp);
+  // ainda há clínicas além das que estão na tela?
+  const temMais = f.whatsappDisponiveis > f.whatsapp.length;
+  const proximoAlvo = f.metas.whatsapp.feitos + f.whatsapp.length + META_WHATSAPP;
   const vazio = !f.negociacao.length && !f.respostas.length && !f.whatsapp.length && !f.ligacoes.length && !f.visitas.length && !f.followUps.length;
 
   return (
@@ -108,11 +116,27 @@ export async function FilaDoDia({ remetente }: { remetente: string }) {
         }}
       />
       <Secao
+        id="whatsapp"
         titulo="WhatsApp: primeira mensagem"
         ajuda="Ordem de prioridade. Abra, confira o texto e envie do número comercial, uma por vez."
         itens={f.whatsapp}
         render={(p) => <CartaoProspect key={p.id} p={cartao(p)} modo="whatsapp" texto={primeiraMensagem(p, remetente)} rotuloTexto="Mensagem (pode editar antes de abrir)" />}
       />
+      {temMais && (
+        <div id="mais-whatsapp" className="flex scroll-mt-6 flex-wrap items-center justify-between gap-3 rounded-2xl bg-menta-clara px-5 py-4">
+          <p className="text-sm">
+            {f.whatsapp.length
+              ? "Mandou todas as de cima? Carregue mais para continuar."
+              : `Meta de hoje feita: ${f.metas.whatsapp.feitos} mensagem(ns). Quer mandar mais?`}
+            <span className="block text-xs text-slate-600">
+              Ainda há {f.whatsappDisponiveis - f.whatsapp.length} clínica(s) com WhatsApp esperando a 1ª mensagem.
+            </span>
+          </p>
+          <Link href={`?mais=${proximoAlvo}#whatsapp`} className="botao px-5 py-2">
+            Carregar mais {META_WHATSAPP}
+          </Link>
+        </div>
+      )}
       <Secao
         titulo="Ligações"
         ajuda="Telefone fixo ou sem WhatsApp. Melhor horário: 9h às 11h30 e 14h às 17h."
@@ -145,10 +169,10 @@ function Meta({ rotulo, feitos, meta }: { rotulo: string; feitos: number; meta: 
   );
 }
 
-function Secao({ titulo, ajuda, itens, render }: { titulo: string; ajuda: string; itens: ItemFila[]; render: (p: ItemFila) => React.ReactNode }) {
+function Secao({ id, titulo, ajuda, itens, render }: { id?: string; titulo: string; ajuda: string; itens: ItemFila[]; render: (p: ItemFila) => React.ReactNode }) {
   if (!itens.length) return null;
   return (
-    <section>
+    <section id={id} className="scroll-mt-6">
       <div className="mb-3">
         <h2 className="text-xl font-bold">
           {titulo} <span className="text-base font-normal text-slate-400">({itens.length})</span>

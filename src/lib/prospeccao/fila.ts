@@ -137,7 +137,11 @@ async function encerrarSemResposta(agora: Date) {
   }
 }
 
-export async function montarFila(agora = new Date()) {
+/**
+ * `alvoWhatsapp`: quantas 1ªs mensagens a fila deve completar hoje. Começa na meta (10);
+ * o botão "carregar mais 10" da página sobe esse número.
+ */
+export async function montarFila(agora = new Date(), alvoWhatsapp = META_WHATSAPP) {
   await encerrarSemResposta(agora);
   const hoje = inicioDoDia(agora);
 
@@ -153,6 +157,15 @@ export async function montarFila(agora = new Date()) {
   const disponivel: Prisma.ProspectWhereInput = {
     status: "novo",
     OR: [{ proximoContatoEm: null }, { proximoContatoEm: { lte: agora } }],
+  };
+  const paraWhatsapp: Prisma.ProspectWhereInput = {
+    ...disponivel,
+    cidade: { notIn: CIDADES_VISITA },
+    telefone: { not: null },
+    AND: [
+      { OR: [{ temWhatsapp: true }, { temWhatsapp: null, tipoTelefone: "CELULAR" }] },
+      { OR: [{ canal: null }, { canal: { not: "ligacao" } }] }, // já entrou na fila de ligações
+    ],
   };
   const ordem: Prisma.ProspectOrderByWithRelationInput[] = [{ pontuacao: "desc" }, { avaliacoes: { sort: "desc", nulls: "last" } }];
 
@@ -173,17 +186,9 @@ export async function montarFila(agora = new Date()) {
       },
     }),
     prisma.prospect.findMany({
-      where: {
-        ...disponivel,
-        cidade: { notIn: CIDADES_VISITA },
-        telefone: { not: null },
-        AND: [
-          { OR: [{ temWhatsapp: true }, { temWhatsapp: null, tipoTelefone: "CELULAR" }] },
-          { OR: [{ canal: null }, { canal: { not: "ligacao" } }] }, // já entrou na fila de ligações
-        ],
-      },
+      where: paraWhatsapp,
       orderBy: ordem,
-      take: Math.max(0, META_WHATSAPP - whatsFeitos),
+      take: Math.max(0, Math.max(alvoWhatsapp, META_WHATSAPP) - whatsFeitos),
       select: SELECAO,
     }),
     prisma.prospect.findMany({
@@ -209,6 +214,8 @@ export async function montarFila(agora = new Date()) {
     }),
     prisma.prospect.groupBy({ by: ["status"], _count: true }),
   ]);
+  // quantas ainda podem receber a 1ª mensagem (para mostrar o botão "mais 10")
+  const whatsappDisponiveis = await prisma.prospect.count({ where: paraWhatsapp });
 
   return {
     negociacao,
@@ -217,6 +224,7 @@ export async function montarFila(agora = new Date()) {
     ligacoes,
     visitas,
     followUps,
+    whatsappDisponiveis,
     metas: { whatsapp: { feitos: whatsFeitos, meta: META_WHATSAPP }, ligacoes: { feitos: ligFeitas, meta: META_LIGACOES } },
     funil: Object.fromEntries(funil.map((f) => [f.status, f._count])) as Record<string, number>,
   };
