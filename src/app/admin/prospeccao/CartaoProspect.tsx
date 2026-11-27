@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { registrarAcao } from "./actions";
 import type { Acao } from "@/lib/prospeccao/fila";
+import { RESPOSTAS_PRONTAS } from "@/lib/prospeccao/respostasProntas";
 
 export type DadosCartao = {
   id: string;
@@ -82,6 +83,9 @@ export function CartaoProspect({
 }) {
   const [mensagem, setMensagem] = useState(texto);
   const [whats, setWhats] = useState(mensagemWhats ?? "");
+  const [prontaId, setProntaId] = useState("");
+  const [pronta, setPronta] = useState("");
+  const [prontaCopiada, setProntaCopiada] = useState(false);
   const [feito, setFeito] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [pendente, iniciar] = useTransition();
@@ -165,6 +169,66 @@ export function CartaoProspect({
             rows={enviarPorWhats ? 7 : 5}
             className={`campo text-[13px] leading-relaxed ${enviarPorWhats ? "" : "bg-gelo"}`}
           />
+        </div>
+      )}
+
+      {/* respostas prontas: escolhe, ajusta se quiser e abre no WhatsApp já com o texto */}
+      {resposta && (
+        <div className="mt-3 rounded-2xl bg-gelo p-3">
+          <label className="etiqueta mb-1 block text-[10px] text-slate-500" htmlFor={`pronta-${p.id}`}>
+            Respostas prontas
+          </label>
+          <select
+            id={`pronta-${p.id}`}
+            className="campo bg-white text-sm"
+            value={prontaId}
+            onChange={(e) => {
+              const r = RESPOSTAS_PRONTAS.find((x) => x.id === e.target.value);
+              setProntaId(e.target.value);
+              setPronta(r ? r.texto({ nome: p.nome, porte: p.porte }) : "");
+            }}
+          >
+            <option value="">Escolha o que a clínica falou…</option>
+            {RESPOSTAS_PRONTAS.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.titulo}
+              </option>
+            ))}
+          </select>
+          {pronta && (
+            <>
+              <textarea
+                aria-label="Resposta (pode editar)"
+                value={pronta}
+                onChange={(e) => setPronta(e.target.value)}
+                rows={8}
+                className="campo mt-2 bg-white text-[13px] leading-relaxed"
+              />
+              <div className="mt-2 flex flex-wrap gap-2">
+                {p.telefone && (
+                  <a
+                    href={`https://wa.me/${p.telefone}?text=${encodeURIComponent(pronta)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="botao bg-[#1fa855] hover:bg-[#178a45]"
+                  >
+                    Enviar no WhatsApp
+                  </a>
+                )}
+                <button
+                  type="button"
+                  className="botao-secundario"
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(pronta);
+                    setProntaCopiada(true);
+                    setTimeout(() => setProntaCopiada(false), 1500);
+                  }}
+                >
+                  {prontaCopiada ? "Copiado!" : "Copiar"}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       )}
 
