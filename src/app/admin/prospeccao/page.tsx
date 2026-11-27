@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
-import { Marca } from "@/components/Marca";
 import { exigirAdmin } from "@/lib/sessao";
 import { FilaDoDia } from "./FilaDoDia";
 
@@ -21,8 +20,7 @@ export default async function Prospeccao() {
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:py-10">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <Marca href="/admin/prospeccao" />
-          <h1 className="mt-5 text-3xl font-bold">Fila do dia</h1>
+          <h1 className="text-3xl font-bold">Fila do dia</h1>
           <p className="capitalize text-slate-600">{hoje}</p>
         </div>
         <Link href="/admin/prospeccao/relatorio" className="botao-secundario">

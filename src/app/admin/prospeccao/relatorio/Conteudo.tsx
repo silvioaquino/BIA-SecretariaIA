@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { Marca } from "@/components/Marca";
 import { ETAPAS, gerarRelatorio, type Etapa } from "@/lib/prospeccao/relatorio";
 
 
@@ -25,8 +24,7 @@ export async function ConteudoRelatorio() {
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:py-10">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <Marca href="/admin/prospeccao" />
-          <h1 className="mt-5 text-3xl font-bold">Relatório da semana</h1>
+          <h1 className="text-3xl font-bold">Relatório da semana</h1>
           <p className="text-slate-600">
             {data(r.semana.de)} até hoje · {r.metas.diasUteis} dia(s) útil(eis)
           </p>
