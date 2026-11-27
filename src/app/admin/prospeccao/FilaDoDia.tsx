@@ -30,6 +30,7 @@ function cartao(p: ItemFila): DadosCartao {
     telefone: p.telefone,
     mapsUrl: p.mapsUrl,
     site: p.site,
+    email: p.email,
     nota: p.nota,
     avaliacoes: p.avaliacoes,
     faixa: p.faixa,
@@ -145,9 +146,19 @@ export async function FilaDoDia({ remetente, alvoWhatsapp }: { remetente: string
       />
       <Secao
         titulo="Visitas · Rota 3"
-        ajuda="Itapissuma e Itamaracá: vai direto na visita. Melhor horário: 11h30 às 12h ou 17h30 às 18h."
+        ajuda="Itapissuma e Itamaracá. Melhor horário da visita: 11h30 às 12h ou 17h30 às 18h. Enquanto não der para ir, quem tem WhatsApp ou e-mail já pode ser abordado pelo cartão."
         itens={f.visitas}
-        render={(p) => <CartaoProspect key={p.id} p={cartao(p)} modo="visita" texto={roteiroVisita(p, remetente)} rotuloTexto="Como abrir a conversa" />}
+        render={(p) => (
+          <CartaoProspect
+            key={p.id}
+            p={cartao(p)}
+            modo="visita"
+            texto={roteiroVisita(p, remetente)}
+            rotuloTexto="Como abrir a conversa"
+            // tem WhatsApp (conferido, ou celular ainda não conferido): já dá para mandar a 1ª mensagem
+            mensagemWhats={p.temWhatsapp || (p.temWhatsapp == null && p.tipoTelefone === "CELULAR") ? primeiraMensagem(p, remetente) : undefined}
+          />
+        )}
       />
     </div>
   );

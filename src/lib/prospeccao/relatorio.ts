@@ -21,7 +21,7 @@ export type Etapa = (typeof ETAPAS)[number];
 
 const PROFUNDIDADE_STATUS: Record<string, number> = { abordado: 0, sem_resposta: 0, respondeu: 1, conversa: 2, proposta: 3, piloto: 4, cliente: 5 };
 const PROFUNDIDADE_ACAO: Record<string, number> = {
-  whatsapp_enviado: 0, follow_up_enviado: 0, ligou_nao_atendeu: 0,
+  whatsapp_enviado: 0, email_enviado: 0, follow_up_enviado: 0, ligou_nao_atendeu: 0,
   respondeu: 1,
   virou_conversa: 2, ligou_falou: 2, visitou_conversou: 2,
   proposta_enviada: 3, fechou_piloto: 4, virou_cliente: 5,
@@ -36,7 +36,7 @@ export const NOME_TIPO: Record<Especialidade, string> = {
   OFTALMOLOGIA: "Oftalmologia",
   OUTRA: "Outras",
 };
-const NOME_CANAL: Record<string, string> = { whatsapp: "WhatsApp", ligacao: "Ligação", visita: "Visita" };
+const NOME_CANAL: Record<string, string> = { whatsapp: "WhatsApp", ligacao: "Ligação", visita: "Visita", email: "E-mail" };
 
 export async function gerarRelatorio(agora = new Date()) {
   const semana = inicioDaSemana(agora);
@@ -48,6 +48,7 @@ export async function gerarRelatorio(agora = new Date()) {
     const n = (...acoes: string[]) => g.filter((x) => acoes.includes(x.acao)).reduce((s, x) => s + x._count, 0);
     return {
       mensagens: n("whatsapp_enviado"),
+      emails: n("email_enviado"),
       followUps: n("follow_up_enviado"),
       ligacoes: n("ligou_falou", "ligou_nao_atendeu"),
       visitas: n("visitou_conversou", "visitou_voltar"),
@@ -143,7 +144,7 @@ export function textoRelatorio(r: Relatorio) {
     "",
     "*O que fizemos*",
     `💬 ${a.mensagens}/${r.metas.mensagens} mensagens (${seta(a.mensagens, ant.mensagens)} semana passada: ${ant.mensagens})`,
-    `📞 ${a.ligacoes}/${r.metas.ligacoes} ligações · 🔁 ${a.followUps} follow-ups · 🚗 ${a.visitas} visitas`,
+    `📞 ${a.ligacoes}/${r.metas.ligacoes} ligações · 🔁 ${a.followUps} follow-ups · ✉️ ${a.emails} e-mails · 🚗 ${a.visitas} visitas`,
     "",
     "*O que voltou*",
     `📩 ${pl(a.respostas, "resposta", "respostas")} (${seta(a.respostas, ant.respostas)} semana passada: ${ant.respostas}) · 🗣️ ${pl(a.conversas, "conversa", "conversas")}`,

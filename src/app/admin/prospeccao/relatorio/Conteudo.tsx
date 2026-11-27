@@ -37,10 +37,11 @@ export async function ConteudoRelatorio() {
       {/* ── o que fizemos / o que voltou ── */}
       <section aria-labelledby="t-semana">
         <h2 id="t-semana" className="sr-only">Esta semana</h2>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7">
           <Numero rotulo="Mensagens" valor={a.mensagens} meta={r.metas.mensagens} antes={ant.mensagens} />
           <Numero rotulo="Ligações" valor={a.ligacoes} meta={r.metas.ligacoes} antes={ant.ligacoes} />
           <Numero rotulo="Follow-ups" valor={a.followUps} antes={ant.followUps} />
+          <Numero rotulo="E-mails" valor={a.emails} antes={ant.emails} />
           <Numero rotulo="Respostas" valor={a.respostas} antes={ant.respostas} destaque />
           <Numero rotulo="Conversas" valor={a.conversas} antes={ant.conversas} destaque />
           <Numero rotulo="Pilotos" valor={a.pilotos} antes={ant.pilotos} destaque />

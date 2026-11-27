@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { registrarAcao } from "./actions";
 import type { Acao } from "@/lib/prospeccao/fila";
@@ -14,6 +15,7 @@ export type DadosCartao = {
   telefone: string | null;
   mapsUrl: string | null;
   site: string | null;
+  email: string | null;
   nota: number | null;
   avaliacoes: number | null;
   faixa: string;
@@ -46,6 +48,7 @@ const RESULTADOS: Record<Modo, Acao[]> = {
 const ROTULO: Record<Acao, string> = {
   whatsapp_enviado: "✓ Enviei",
   follow_up_enviado: "✓ Enviei o follow-up",
+  email_enviado: "✓ Enviei o e-mail",
   respondeu: "Já respondeu",
   sem_resposta_concreta: "Ainda sem resposta concreta",
   virou_conversa: "✓ Já respondi, estamos conversando",
@@ -61,8 +64,24 @@ const ROTULO: Record<Acao, string> = {
   pular: "Pular hoje",
 };
 
-export function CartaoProspect({ p, modo, texto, rotuloTexto }: { p: DadosCartao; modo: Modo; texto: string; rotuloTexto: string }) {
+/**
+ * `mensagemWhats`: na visita, se a clínica tem WhatsApp, a 1ª mensagem para abordar antes de ir lá.
+ */
+export function CartaoProspect({
+  p,
+  modo,
+  texto,
+  rotuloTexto,
+  mensagemWhats,
+}: {
+  p: DadosCartao;
+  modo: Modo;
+  texto: string;
+  rotuloTexto: string;
+  mensagemWhats?: string;
+}) {
   const [mensagem, setMensagem] = useState(texto);
+  const [whats, setWhats] = useState(mensagemWhats ?? "");
   const [feito, setFeito] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [pendente, iniciar] = useTransition();
@@ -190,6 +209,52 @@ export function CartaoProspect({ p, modo, texto, rotuloTexto }: { p: DadosCartao
         )}
       </div>
       {modo === "visita" && p.endereco && <p className="mt-2 text-xs text-slate-500">{p.endereco}</p>}
+
+      {/* visita ainda não feita: dá para abordar antes pelo WhatsApp ou por e-mail */}
+      {modo === "visita" && ((mensagemWhats && p.telefone) || p.email) && (
+        <div className="mt-4 rounded-2xl bg-gelo p-3">
+          <p className="etiqueta mb-2 text-[10px] text-slate-500">Ou aborde antes de ir lá</p>
+          {mensagemWhats && p.telefone && (
+            <>
+              <label className="sr-only" htmlFor={`whats-${p.id}`}>Mensagem de WhatsApp</label>
+              <textarea
+                id={`whats-${p.id}`}
+                value={whats}
+                onChange={(e) => setWhats(e.target.value)}
+                rows={6}
+                className="campo bg-white text-[13px] leading-relaxed"
+              />
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <a
+                  href={`https://wa.me/${p.telefone}?text=${encodeURIComponent(whats)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="botao bg-[#1fa855] hover:bg-[#178a45]"
+                >
+                  Abrir no WhatsApp
+                </a>
+                <button
+                  type="button"
+                  disabled={pendente}
+                  onClick={() => marcar("whatsapp_enviado")}
+                  className="rounded-xl bg-bia-escuro px-3 py-2 text-sm font-semibold text-white hover:bg-grafite disabled:opacity-50"
+                >
+                  ✓ Enviei pelo WhatsApp
+                </button>
+                {tel && <span className="text-xs text-slate-500">{tel}</span>}
+              </div>
+            </>
+          )}
+          {p.email && (
+            <p className={`text-sm ${mensagemWhats && p.telefone ? "mt-3" : ""}`}>
+              ✉️ {p.email} ·{" "}
+              <Link href={`/admin/prospeccao/email?id=${p.id}`} className="font-semibold text-bia hover:underline">
+                Escrever e-mail
+              </Link>
+            </p>
+          )}
+        </div>
+      )}
       {enviarPorWhats && tel && <p className="mt-2 text-xs text-slate-500">{tel} · confira o texto e envie você mesmo, do número comercial.</p>}
 
       <div className="mt-4 border-t border-slate-100 pt-3">

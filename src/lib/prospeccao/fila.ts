@@ -16,6 +16,7 @@ export function inicioDoDia(agora = new Date()) {
 export const ACOES = {
   whatsapp_enviado: "Enviei a mensagem",
   follow_up_enviado: "Enviei o follow-up",
+  email_enviado: "Enviei o e-mail",
   respondeu: "Respondeu",
   sem_resposta_concreta: "Ainda sem resposta concreta",
   virou_conversa: "Conversa em andamento",
@@ -57,6 +58,13 @@ export async function registrar(
   switch (acao) {
     case "whatsapp_enviado":
       data = { ...contato, status: "abordado", canal: "whatsapp", tentativas: 1, proximoContatoEm: em(DIAS_FOLLOW_UP[0]) };
+      break;
+    case "email_enviado":
+      // sem follow-up automático: fica em "E-mails aguardando resposta" na página de e-mail.
+      // Quem já estava sendo abordado por outro canal continua onde estava.
+      data = p.status === "novo" || p.status === "sem_resposta"
+        ? { ...contato, status: "abordado", canal: "email", tentativas: 1, proximoContatoEm: null }
+        : { ...contato, tentativas: p.tentativas + 1 };
       break;
     case "follow_up_enviado": {
       const t = p.tentativas + 1;
@@ -131,7 +139,7 @@ export async function registrar(
 
 const SELECAO = {
   id: true, nome: true, tipo: true, cidade: true, bairro: true, endereco: true, telefone: true,
-  tipoTelefone: true, temWhatsapp: true, mapsUrl: true, site: true, instagram: true, nota: true,
+  tipoTelefone: true, temWhatsapp: true, email: true, mapsUrl: true, site: true, instagram: true, nota: true,
   avaliacoes: true, porteEstimado: true, pontuacao: true, faixa: true, motivos: true, status: true,
   tentativas: true, observacoes: true, ultimoContatoEm: true,
 } satisfies Prisma.ProspectSelect;

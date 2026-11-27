@@ -183,6 +183,7 @@ model Prospect {
   temWhatsapp          Boolean? // null = ainda não verificado
   whatsappVerificadoEm DateTime?
 
+  email     String? // e-mail que a clínica divulga (site, Instagram): abordagem por e-mail
   site      String?
   instagram String?
   mapsUrl   String?
@@ -201,7 +202,7 @@ model Prospect {
   extras      Json? // colunas da planilha que ainda não têm campo próprio
 
   // contato (preenchido pela fila do dia)
-  canal             String? // whatsapp | ligacao | visita
+  canal             String? // whatsapp | ligacao | visita | email
   tentativas        Int                 @default(0) // 1ª mensagem + follow-ups
   primeiroContatoEm DateTime?
   ultimoContatoEm   DateTime?

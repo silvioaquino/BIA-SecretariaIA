@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     `📞 ${f.ligacoes.length} ligações`,
     f.visitas.length ? `🚗 ${f.visitas.length} visitas na Rota 3 (quando for dia de rota)` : null,
     "",
-    `Ontem: ${n("whatsapp_enviado")} mensagens, ${n("follow_up_enviado")} follow-ups, ${n("ligou_falou") + n("ligou_nao_atendeu")} ligações, ${Math.max(0, n("respondeu") - n("sem_resposta_concreta"))} respostas.`,
+    `Ontem: ${n("whatsapp_enviado")} mensagens, ${n("email_enviado")} e-mails, ${n("follow_up_enviado")} follow-ups, ${n("ligou_falou") + n("ligou_nao_atendeu")} ligações, ${Math.max(0, n("respondeu") - n("sem_resposta_concreta"))} respostas.`,
     "",
     `${process.env.APP_URL ?? ""}/admin/prospeccao`,
   ].filter((l) => l !== null);
