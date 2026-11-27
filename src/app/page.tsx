@@ -39,7 +39,7 @@ export default function Landing() {
             <a href="#duvidas" className="hover:text-bia">Dúvidas</a>
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/entrar" className="hidden text-sm font-semibold text-slate-600 hover:text-bia sm:block">Entrar</Link>
+            <Link href="/entrar" className="px-1 py-2 text-sm font-semibold text-slate-600 hover:text-bia">Entrar</Link>
             <a href="#precos" className="botao px-4 py-2">Começar</a>
           </div>
         </div>
