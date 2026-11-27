@@ -2,8 +2,10 @@
 
 import { createContext, useContext, useRef, useState } from "react";
 
-// No celular, as seções da fila viram abas: uma lista horizontal no topo e só a
-// seção escolhida aparece. No computador (md+), tudo continua numa página só.
+// As seções da fila viram abas: uma lista horizontal no topo e só a seção
+// escolhida aparece. "Todas" mostra a fila inteira numa página só.
+
+const TODAS = "todas";
 
 export type InfoAba = { id: string; rotulo: string; total: number };
 
@@ -27,9 +29,9 @@ export function AbasSecoes({ abas, inicial, children }: { abas: InfoAba[]; inici
         {visiveis.length > 1 && (
           <nav
             aria-label="Seções da fila"
-            className="sticky top-0 z-30 -mx-4 mb-4 flex gap-2 overflow-x-auto border-b border-slate-200 bg-gelo/95 px-4 py-2 backdrop-blur [scrollbar-width:none] md:hidden"
+            className="sticky top-0 z-30 -mx-4 mb-4 flex gap-2 overflow-x-auto border-b border-slate-200 bg-gelo/95 px-4 py-2 backdrop-blur [scrollbar-width:none]"
           >
-            {visiveis.map((a) => (
+            {[{ id: TODAS, rotulo: "Todas", total: visiveis.reduce((t, a) => t + a.total, 0) }, ...visiveis].map((a) => (
               <button
                 key={a.id}
                 type="button"
@@ -50,8 +52,8 @@ export function AbasSecoes({ abas, inicial, children }: { abas: InfoAba[]; inici
   );
 }
 
-/** Conteúdo de uma aba: no celular só aparece se for a escolhida; no computador, sempre. */
+/** Conteúdo de uma aba: só aparece se for a escolhida (ou com "Todas"). */
 export function Aba({ id, children }: { id: string; children: React.ReactNode }) {
   const ativa = useContext(AbaAtiva);
-  return <div className={ativa === id ? "" : "hidden md:block"}>{children}</div>;
+  return <div className={ativa === id || ativa === TODAS ? "" : "hidden"}>{children}</div>;
 }
