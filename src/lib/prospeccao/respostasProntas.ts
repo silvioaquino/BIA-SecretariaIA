@@ -6,6 +6,8 @@ type Dados = { nome: string; porte?: string | null };
 
 export type RespostaPronta = { id: string; titulo: string; texto: (p: Dados) => string };
 
+const SITE = "https://biasecretariaia.vercel.app";
+
 const clinica = (nome: string) => nome.split(/ [-–|] /)[0].trim();
 
 /** Preço do piloto pelo porte estimado; sem porte, fala "a partir de". */
@@ -38,6 +40,30 @@ export const RESPOSTAS_PRONTAS: RespostaPronta[] = [
         "Com 30 dias, a gente senta junto e compara as faltas de antes e de depois da BIA, para você decidir se continua.",
         "Para comparar: normalmente 1 ou 2 faltas evitadas já pagam o mês.",
         "Antes de qualquer decisão, posso te mostrar como funciona em 10 minutos, sem compromisso. Quer marcar?",
+      ].join("\n\n"),
+  },
+  {
+    id: "portfolio",
+    titulo: "Pediu portfólio ou vídeo de demonstração",
+    texto: () =>
+      [
+        "Ótima pergunta! 😊",
+        "Estamos começando aqui na região, por isso estou fazendo o teste de 30 dias com só 3 clínicas: para vocês verem o resultado na própria agenda antes de decidir qualquer coisa.",
+        "Mas dá para ver funcionando agora mesmo:",
+        `1. No site tem a demonstração de como fica a conversa com o paciente: ${SITE}`,
+        "2. Melhor ainda: me passa um WhatsApp pessoal seu (ou da recepcionista) que eu mando uma confirmação de teste, igual à que o paciente recebe. Você responde e vê na hora o que acontece.",
+        "Se preferir, mostro tudo em 10 minutos por chamada de vídeo ou passo aí na clínica.",
+      ].join("\n\n"),
+  },
+  {
+    id: "teste_enviado",
+    titulo: "Mandei a confirmação de teste",
+    texto: () =>
+      [
+        "Prontinho! Acabei de mandar a confirmação de teste para o número que você me passou. 📲",
+        "Responda 1 para confirmar ou 2 para remarcar e veja o que acontece. Quando o paciente escolhe remarcar, a recepção recebe um alerta na hora.",
+        "Na clínica de vocês, a mensagem sai do WhatsApp da própria clínica, com o nome e o jeito de falar de vocês.",
+        "Depois me conta o que achou!",
       ].join("\n\n"),
   },
   {
